@@ -1,0 +1,3 @@
+//figure out the save name for images , multiple images for each day 
+backend setup i.e db setup for all users 
+https://supabase.com/dashboard/project/azoycmqbunuexujzjfyt/api?page=tables-intro

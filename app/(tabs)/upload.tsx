@@ -2,13 +2,15 @@ import React, { useState } from 'react';
 import { View, Image, StyleSheet, Alert, Text, Pressable } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
-import { toDateId } from '@marceloterreiro/flash-calendar';
+// import { toDateId } from '@marceloterreiro/flash-calendar';
 import { Link } from 'expo-router';
+import { format } from 'date-fns';
 
 const ProgressUploadScreen = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [uploadMessage, setUploadMessage] = useState('');
-
+  const [imageDate,setImageDate] =useState(format(new Date(), 'yyyy-MM-dd'));
+  
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -19,11 +21,18 @@ const ProgressUploadScreen = () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
-      aspect: [4, 3],
+      // aspect: [4, 3],
       quality: 1,
+      exif:true,
     });
 
     if (!result.canceled && result.assets && result.assets.length > 0) {
+      const exifData = result.assets[0].exif;    
+      const creationDate = exifData?.DateTimeOriginal;
+      const formattedDate = creationDate.split(' ')[0].replace(/:/g, '-'); 
+      // console.log(creationDate);
+      // console.log(formattedDate);
+      setImageDate(formattedDate);
       setSelectedImage(result.assets[0].uri);
       setUploadMessage('');
     }
@@ -38,9 +47,9 @@ const ProgressUploadScreen = () => {
     try {
       const directory = FileSystem.documentDirectory + 'gym-progress/';
       await FileSystem.makeDirectoryAsync(directory, { intermediates: true });
-      const filename = toDateId(new Date())+ '.jpg';
+      const filename = imageDate+ '.jpg';
       const newPath = directory + filename;
-
+      console.log(newPath);
       await FileSystem.copyAsync({
         from: selectedImage,
         to: newPath,
@@ -91,7 +100,7 @@ const styles = StyleSheet.create({
       padding: 20,
       alignItems: 'center',
       justifyContent: 'space-between',
-      backgroundColor: '#FFFFFF',
+      // backgroundColor: '#FFFFFF',
     },
     buttonsContainer: {
       width: '100%',
